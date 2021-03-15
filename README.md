@@ -1,4 +1,4 @@
-@fustaro/servo-core
+# @fustaro/servo-core
 
 Core classes and methods to ease the pain of controlling servos using node.
 
