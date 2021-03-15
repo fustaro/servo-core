@@ -29,10 +29,10 @@ export class Servo {
     readonly channel: number;
     readonly flipDirection: boolean;
 
-    constructor(servoModel: ServoModel, centerOffsetPwm: number, flipDirection: boolean, channel: number){
-        this.servoModel = servoModel;
-        this.centerOffsetPwm = centerOffsetPwm;
-        this.channel = channel;
-        this.flipDirection = flipDirection;
+    constructor(data: Servo){
+        this.servoModel = data.servoModel;
+        this.centerOffsetPwm = data.centerOffsetPwm;
+        this.channel = data.channel;
+        this.flipDirection = data.flipDirection;
     }
 }
