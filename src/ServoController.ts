@@ -2,17 +2,17 @@ import { HardwareInterface } from "./HardwareInterface";
 import { Servo, ServoDirection } from "./Servo";
 
 export class ServoControllerFactory {
-	private static readonly controllers = new Map<string, ServoController>();
+	private static readonly controllers = new Map<string, IServoController>();
 
     constructor() {
         throw new Error('Use ServoControllerFactory.get() and ServoControllerFactory.create() methods.');
 	}
 
-	static get = (uniqueHardwareName: string): ServoController | null => {
+	static get = (uniqueHardwareName: string): IServoController | null => {
 		return ServoControllerFactory.controllers.get(uniqueHardwareName);
 	}
 	
-    static create = (hardwareInterface: HardwareInterface) => {
+    static create = (hardwareInterface: HardwareInterface): IServoController => {
 		if(ServoControllerFactory.controllers.has(hardwareInterface.uniqueHardwareName)){
 			throw new Error(`A ServoController already exists named ${hardwareInterface.uniqueHardwareName}, you can only run this command if ServoControllerFactor.get() returns null.
 			This is to stop you initializing your hardware multiple times.`);
