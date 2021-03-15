@@ -7,7 +7,7 @@
         "noImplicitAny": false,
         "moduleResolution": "node",
         "sourceMap": false,
-        "rootDir": ".",
+        "rootDir": "./src",
         "outDir": "./dist",
         "removeComments": true,
     },
