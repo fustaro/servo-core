@@ -13,13 +13,13 @@ export class ServoModel {
     readonly pwmRange: Range;
     readonly angleRange: Range;
     readonly speed: number; 
-    readonly servoDirecton: ServoDirection;
+    readonly servoDirection: ServoDirection;
 
     constructor(data: ServoModel){
         this.pwmRange = data.pwmRange;
         this.angleRange = data.angleRange;
         this.speed = data.speed;
-        this.servoDirecton = data.servoDirecton;
+        this.servoDirection = data.servoDirection;
     }
 }
 
