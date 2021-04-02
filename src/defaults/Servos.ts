@@ -8,8 +8,8 @@ export const Turnigy_TGY1501: ServoModel = new ServoModel({
 });
 
 export const Turnigy_TGY4409MD: ServoModel = new ServoModel({
-    pwmRange:   { min: 600, natural: 1500,  max: 2400 },
-    angleRange: { min: -100, natural: 0,     max: 100 },
+    pwmRange:   { min: 528, natural: 1500,  max: 2496 },
+    angleRange: { min: -90, natural: 0,     max: 90 },
     speed: 0.11,
     servoDirection: ServoDirection.HIGHER_PWM_CLOCKWISE
 });
