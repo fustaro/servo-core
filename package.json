@@ -1,6 +1,6 @@
 {
   "name": "@fustaro/servo-core",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "fustaro",
   "description": "core functionality for node servo controllers",
   "scripts": {
