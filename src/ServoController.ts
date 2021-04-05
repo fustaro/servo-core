@@ -45,6 +45,10 @@ class ServoController implements IServoController {
 
 		if(servo.servoModel.servoDirection == ServoDirection.LOWER_PWM_CLOCKWISE) flip = !flip;
 
+		if(servo.angleClamp){
+			angle = Math.max(Math.min(angle, servo.angleClamp.max), servo.angleClamp.min);
+		}
+
 		const angleRange = angle < 0 ? sm.angleRange.min : sm.angleRange.max;
 		const pwmRange = (flip ? -angle : angle) < 0 ? sm.pwmRange.min : sm.pwmRange.max;
 	

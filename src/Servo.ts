@@ -28,11 +28,13 @@ export class Servo {
     readonly centerOffsetPwm: number;
     readonly channel: number;
     readonly flipDirection: boolean;
+    readonly angleClamp?: Range;
 
     constructor(data: Servo){
         this.servoModel = data.servoModel;
         this.centerOffsetPwm = data.centerOffsetPwm;
         this.channel = data.channel;
         this.flipDirection = data.flipDirection;
+        if(data.angleClamp) this.angleClamp = data.angleClamp;
     }
 }
