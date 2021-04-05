@@ -61,11 +61,17 @@ describe('ServoController', () => {
                 pwmRange: { min: 500, natural: 1000, max: 1500 },
                 angleRange: { min: -50, natural: 0, max: 50 },
                 speed: 0.1,
-                servoDirecton: ServoDirection.HIGHER_PWM_CLOCKWISE
+                servoDirection: ServoDirection.HIGHER_PWM_CLOCKWISE
             });
 
             describe('flipDirection: false', () => {
-                const servo = new Servo(servoModel1, 0, false, 0);
+                const servo = new Servo({
+                    servoModel: servoModel1, 
+                    centerOffsetPwm: 0, 
+                    flipDirection: false,
+                    channel: 0,
+                    angleClamp: { min: -50, natural: 0, max: 50 }
+                });
 
                 it.each([
                     [ 0, 1000 ],
@@ -79,7 +85,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = 10', () => {
-                    const servo1 = new Servo(servoModel1, 10, false, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: 10, 
+                        flipDirection: false,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 + 10 ],
@@ -94,7 +105,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = -10', () => {
-                    const servo1 = new Servo(servoModel1, -10, false, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: -10, 
+                        flipDirection: false,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 - 10 ],
@@ -110,7 +126,12 @@ describe('ServoController', () => {
             });
 
             describe('flipDirection: true', () => {
-                const servo = new Servo(servoModel1, 0, true, 0);
+                const servo = new Servo({
+                    servoModel: servoModel1, 
+                    centerOffsetPwm: 0, 
+                    flipDirection: true,
+                    channel: 0
+                });
 
                 it.each([
                     [ 0, 1000 ],
@@ -124,7 +145,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = 10', () => {
-                    const servo1 = new Servo(servoModel1, 10, true, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: 10, 
+                        flipDirection: true,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 + 10 ],
@@ -139,7 +165,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = -10', () => {
-                    const servo1 = new Servo(servoModel1, -10, true, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: -10, 
+                        flipDirection: true,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 - 10 ],
@@ -160,11 +191,16 @@ describe('ServoController', () => {
                 pwmRange: { min: 500, natural: 1000, max: 1500 },
                 angleRange: { min: -50, natural: 0, max: 50 },
                 speed: 0.1,
-                servoDirecton: ServoDirection.LOWER_PWM_CLOCKWISE
+                servoDirection: ServoDirection.LOWER_PWM_CLOCKWISE
             });
 
             describe('flipDirection: false', () => {
-                const servo = new Servo(servoModel1, 0, false, 0);
+                const servo = new Servo({
+                    servoModel: servoModel1, 
+                    centerOffsetPwm: 0, 
+                    flipDirection: false,
+                    channel: 0
+                });
 
                 it.each([
                     [ 0, 1000 ],
@@ -178,7 +214,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = 10', () => {
-                    const servo1 = new Servo(servoModel1, 10, false, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: 10, 
+                        flipDirection: false,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 + 10 ],
@@ -193,7 +234,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = -10', () => {
-                    const servo1 = new Servo(servoModel1, -10, false, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: -10, 
+                        flipDirection: false,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 - 10 ],
@@ -209,7 +255,12 @@ describe('ServoController', () => {
             });
 
             describe('flipDirection: true', () => {
-                const servo = new Servo(servoModel1, 0, true, 0);
+                const servo = new Servo({
+                    servoModel: servoModel1, 
+                    centerOffsetPwm: 0, 
+                    flipDirection: true,
+                    channel: 0
+                });
 
                 it.each([
                     [ 0, 1000 ],
@@ -223,7 +274,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = 10', () => {
-                    const servo1 = new Servo(servoModel1, 10, true, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: 10, 
+                        flipDirection: true,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 + 10 ],
@@ -238,7 +294,12 @@ describe('ServoController', () => {
                 });
 
                 describe('servo centerOffsetPwm = -10', () => {
-                    const servo1 = new Servo(servoModel1, -10, true, 0);
+                    const servo1 = new Servo({
+                        servoModel: servoModel1, 
+                        centerOffsetPwm: -10, 
+                        flipDirection: true,
+                        channel: 0
+                    });
 
                     it.each([
                         [ 0, 1000 - 10 ],
@@ -274,11 +335,17 @@ describe('ServoController', () => {
             pwmRange: { min: 500, natural: 1000, max: 1500 },
             angleRange: { min: -50, natural: 0, max: 50 },
             speed: 0.1,
-            servoDirecton: ServoDirection.LOWER_PWM_CLOCKWISE
+            servoDirection: ServoDirection.LOWER_PWM_CLOCKWISE
         });
 
         const channelNo = 102;
-        const servo = new Servo(servoModel, 0, true, channelNo);
+
+        const servo = new Servo({
+            servoModel: servoModel, 
+            centerOffsetPwm: 0, 
+            flipDirection: true,
+            channel: channelNo
+        });
 
         it('should call writePwm with correct channel and pwm values', () => {
             const pwm = 1231;

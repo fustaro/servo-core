@@ -45,6 +45,8 @@ class ServoController implements IServoController {
 
 		if(servo.servoModel.servoDirection == ServoDirection.LOWER_PWM_CLOCKWISE) flip = !flip;
 
+		if(isNaN(angle)) angle = 0;
+
 		if(servo.angleClamp){
 			angle = Math.max(Math.min(angle, servo.angleClamp.max), servo.angleClamp.min);
 		}
