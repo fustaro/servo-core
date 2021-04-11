@@ -26,8 +26,8 @@ export class ServoControllerFactory {
 }
 
 export interface IServoController {
-	setAngleDegrees: (servo: Servo, angle: number) => void;
-	setAngleRadians: (servo: Servo, angle: number) => void;
+	setAngleDegrees: (servo: Servo, angle: number, debug?: boolean) => void;
+	setAngleRadians: (servo: Servo, angle: number, debug?: boolean) => void;
 }
 
 class ServoController implements IServoController {
@@ -39,7 +39,7 @@ class ServoController implements IServoController {
 		this.previousPwmValues = new Array<number>(servoHardwareDriver.chanelCount);
 	}
 
-	setAngleDegrees = (servo: Servo, angle: number) => {
+	setAngleDegrees = (servo: Servo, angle: number, debug: boolean = false) => {
 		const sm = servo.servoModel;
 		let flip = servo.flipDirection;
 
@@ -47,18 +47,67 @@ class ServoController implements IServoController {
 
 		if(isNaN(angle)) angle = 0;
 
-		if(servo.angleClamp){
-			angle = Math.max(Math.min(angle, servo.angleClamp.max), servo.angleClamp.min);
+		let debugMessage;
+
+		if(debug){
+			debugMessage = `Servo: setAngleDegrees: ${angle}deg, hardware: ${this.hardwareInterface.uniqueHardwareName}, channel: ${servo.channel}\n`;
+		}
+
+		if(servo.angleClamp?.min){
+			angle = Math.max(angle, servo.angleClamp.min);
+			debugMessage += `-- angle clamping set on min: (${servo.angleClamp.min})deg, result: ${angle}deg\n`;
+		}
+
+		if(servo.angleClamp?.max){
+			angle = Math.min(angle, servo.angleClamp.max);
+			debugMessage += `-- angle clamping set on max: (${servo.angleClamp.max})deg, result: ${angle}deg\n`;
+		}
+
+		if(debug && !servo.angleClamp?.min && !servo.angleClamp?.max){
+			debugMessage += `-- no angle clamping set on servo\n`;
 		}
 
 		const angleRange = angle < 0 ? sm.angleRange.min : sm.angleRange.max;
 		const pwmRange = (flip ? -angle : angle) < 0 ? sm.pwmRange.min : sm.pwmRange.max;
+
+		if(debug){
+			if(angle < 0){
+				debugMessage += `-- angle < 0, using min angle range to calculate pwm ratio: ${angleRange}\n`;
+			} else {
+				debugMessage += `-- angle >= 0, using max angle range to calculate pwm ratio: ${angleRange}\n`;
+			}
+
+			if(flip){
+				debugMessage += `-- flipDirection is set, using opposite pwm range for calculations: ${pwmRange}\n`;
+			} else {
+				debugMessage += `-- flipDirection not set, using pwm range for calculations: ${pwmRange}\n`;
+			}
+		}
 	
 		const pwmDiff = pwmRange - sm.pwmRange.natural;
 		
 		let pwm = sm.pwmRange.natural + pwmDiff * (angle / angleRange);
+
+		if(debug){
+			debugMessage += `-- angle as ratio of angleRange: ${(angle / angleRange)}, natural (home) pwm: ${sm.pwmRange.natural}, calculated pwm: ${pwm}\n`;
+		}
+
 		pwm += servo.centerOffsetPwm;
+
+		if(debug){
+			if(servo.centerOffsetPwm != 0){
+				debugMessage += `-- centerOffsetPwm: ${servo.centerOffsetPwm}, adjusted output pwm: ${pwm}\n`;
+			} else {
+				debugMessage += `-- no centerOffsetPwm set on servo\n`;
+			}
+		}
+
 		pwm = Math.max(Math.min(pwm, sm.pwmRange.max), sm.pwmRange.min);
+
+		if(debug){
+			debugMessage += `-- final pwm: ${pwm}, clamped to ${sm.pwmRange.min} - ${sm.pwmRange.max}\n`;
+			console.debug(debugMessage);
+		}
 	
 		if(this.hardwareInterface.asyncPwmWrite){
 			setTimeout(() => {
@@ -69,8 +118,8 @@ class ServoController implements IServoController {
 		}
 	}
 
-	setAngleRadians = (servo: Servo, angle: number) => {
-		this.setAngleDegrees(servo, angle / Math.PI * 180);
+	setAngleRadians = (servo: Servo, angle: number, debug: boolean = false) => {
+		this.setAngleDegrees(servo, angle / Math.PI * 180, debug);
 	}
 
 	private writePwm = (servo: Servo, pwm: number) => {
