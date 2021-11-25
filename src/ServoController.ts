@@ -1,5 +1,6 @@
 import { HardwareInterface } from "./HardwareInterface";
-import { Servo, ServoDirection } from "./Servo";
+import { Servo } from "./Servo";
+import { ServoDirection } from "./ServoDirection";
 
 export class ServoControllerFactory {
 	private static readonly controllers = new Map<string, IServoController>();

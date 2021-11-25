@@ -1,4 +1,5 @@
-import { ServoDirection, ServoModel } from "../Servo";
+import { ServoDirection } from "../ServoDirection";
+import { ServoModel } from "../ServoModel";
 
 export const Turnigy_TGY1501: ServoModel = new ServoModel({
     pwmRange:   { min: 660, natural: 1000,  max: 1280 },
