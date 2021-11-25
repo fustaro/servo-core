@@ -1,40 +1,46 @@
-export enum ServoDirection {
-    HIGHER_PWM_CLOCKWISE,
-    LOWER_PWM_CLOCKWISE,
-}
+import { IServoController } from "./ServoController";
+import { ServoModel } from "./ServoModel";
+import { Range } from "./Range";
 
-export interface Range {
-    readonly min: number;
-    readonly natural: number;
-    readonly max: number;
-}
-
-export class ServoModel {
-    readonly pwmRange: Range;
-    readonly angleRange: Range;
-    readonly speed: number; 
-    readonly servoDirection: ServoDirection;
-
-    constructor(data: ServoModel){
-        this.pwmRange = data.pwmRange;
-        this.angleRange = data.angleRange;
-        this.speed = data.speed;
-        this.servoDirection = data.servoDirection;
-    }
+export interface IServo {
+    readonly servoModel: ServoModel;
+    readonly controller: IServoController;
+    readonly channel: number;
+    readonly centerOffsetPwm: number;
+    readonly flipDirection: boolean;
+    readonly angleClamp?: Range;
 }
 
 export class Servo {
     readonly servoModel: ServoModel;
-    readonly centerOffsetPwm: number;
+    readonly controller: IServoController;
     readonly channel: number;
+    readonly centerOffsetPwm: number;
     readonly flipDirection: boolean;
     readonly angleClamp?: Range;
 
-    constructor(data: Servo){
+    constructor (data: IServo) {
+        if (!data.servoModel) {
+            throw new Error("Servo: ServoModel must be present (property 'servoModel')");
+        }
+
+        if (!data.controller) {
+            throw new Error("Servo: ServoController must be present (property 'controller')");
+        }
+
         this.servoModel = data.servoModel;
-        this.centerOffsetPwm = data.centerOffsetPwm;
+        this.controller = data.controller;
         this.channel = data.channel;
+        this.centerOffsetPwm = data.centerOffsetPwm;
         this.flipDirection = data.flipDirection;
         if(data.angleClamp) this.angleClamp = data.angleClamp;
     }
+
+	setAngleDegrees = (angle: number, debug?: boolean) => {
+        this.controller.setAngleDegrees(this, angle, debug)
+    };
+
+	setAngleRadians = (angle: number, debug?: boolean) => {
+        this.controller.setAngleRadians(this, angle, debug)
+    };
 }
