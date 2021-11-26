@@ -37,7 +37,7 @@ class ServoController implements IServoController {
 
 	constructor(servoHardwareDriver: HardwareInterface){
 		this.hardwareInterface = servoHardwareDriver;
-		this.previousPwmValues = new Array<number>(servoHardwareDriver.chanelCount);
+		this.previousPwmValues = new Array<number>(servoHardwareDriver.channelCount);
 	}
 
 	setAngleDegrees = (servo: Servo, angle: number, debug: boolean = false) => {

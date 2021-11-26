@@ -16,8 +16,8 @@ export const Turnigy_TGY4409MD: ServoModel = new ServoModel({
 });
 
 export const TowerPro_MG92B: ServoModel = new ServoModel({
-    pwmRange:   { min: 750, natural: 1500,  max: 2250 },
-    angleRange: { min: -75, natural: 0,     max: 75 },
+    pwmRange:   { min: 720, natural: 1500,  max: 2280 },
+    angleRange: { min: -76.5, natural: 0,     max: 76.5 },
     speed: 0.08,
     servoDirection: ServoDirection.HIGHER_PWM_CLOCKWISE
 });
@@ -35,3 +35,4 @@ export const Savox_SH0256: ServoModel = new ServoModel({
     speed: 0.11,
     servoDirection: ServoDirection.HIGHER_PWM_CLOCKWISE
 });
+
