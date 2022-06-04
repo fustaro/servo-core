@@ -24,12 +24,18 @@ export class ServoControllerFactory {
 
 		return controller;
     }
+
+	private static dispose = (uniqueHardwareName: string): void => {
+		ServoControllerFactory.controllers.delete(uniqueHardwareName);
+	}
 }
 
 export interface IServoController {
 	setAngleDegrees: (servo: Servo, angle: number, debug?: boolean) => void;
 	setAngleRadians: (servo: Servo, angle: number, debug?: boolean) => void;
 	disableServo: (servo: Servo, debug?: boolean) => void;
+	enableServo: (servo: Servo, debug?: boolean) => void;
+	dispose: () => void;
 }
 
 class ServoController implements IServoController {
@@ -126,12 +132,12 @@ class ServoController implements IServoController {
 
 	disableServo = (servo: Servo, debug?: boolean) => {
 		if(debug){
-			console.log(`Servo: disableSevo: hardware: ${this.hardwareInterface.uniqueHardwareName}, channel: ${servo.channel}`);
+			console.log(`ServoController: disableServo: hardware: ${this.hardwareInterface.uniqueHardwareName}, channel: ${servo.channel}`);
 		}
 
 		if(!this.hardwareInterface.servoDriver.disableServo){
 			if(debug){
-				console.log(`Unable to disable servo, hardware ${this.hardwareInterface.uniqueHardwareName} has no implementation`);
+				console.warn(`ServoController: Unable to disable servo, hardware ${this.hardwareInterface.uniqueHardwareName} has no implementation`);
 			}
 			return;
 		}
@@ -143,6 +149,36 @@ class ServoController implements IServoController {
 		} else {
 			this.hardwareInterface.servoDriver.disableServo(servo.channel);
 		}
+	}
+
+	enableServo = (servo: Servo, debug?: boolean) => {
+		if(debug){
+			console.log(`ServoController: enableServo: hardware: ${this.hardwareInterface.uniqueHardwareName}, channel: ${servo.channel}`);
+		}
+
+		if(!this.hardwareInterface.servoDriver.enableServo){
+			if(debug){
+				console.warn(`ServoController: Unable to enable servo, hardware ${this.hardwareInterface.uniqueHardwareName} has no implementation`);
+			}
+			return;
+		}
+
+		if(this.hardwareInterface.asyncPwmWrite){
+			setTimeout(() => {
+				this.hardwareInterface.servoDriver.enableServo(servo.channel);
+			}, 0);
+		} else {
+			this.hardwareInterface.servoDriver.enableServo(servo.channel);
+		}
+	}
+	
+	dispose = (debug?: boolean) => {
+		if(debug){
+			console.log(`ServoController: dispose called`);
+		}
+
+		this.hardwareInterface.servoDriver.dispose();
+		ServoControllerFactory['dispose'](this.hardwareInterface.uniqueHardwareName);
 	}
 
 	private writePwm = (servo: Servo, pwm: number) => {

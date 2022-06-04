@@ -47,4 +47,8 @@ export class Servo {
     disable = (debug?: boolean) => {
         this.controller.disableServo(this, debug);
     }
+
+    enable = (debug?: boolean) => {
+        this.controller.enableServo(this, debug);
+    }
 }

@@ -10,8 +10,11 @@ describe('ServoControllerFactory', () => {
     });
 
     it('should create and return a new ServoController', () => {
-        const ServoDriver: ServoDriver = { writePwm: jest.fn() };
-        const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST1', 0, false);
+        const ServoDriver: ServoDriver = {
+            writePwm: jest.fn(),
+            dispose: jest.fn()
+        };
+        const hardwareInterface = new HardwareInterface(ServoDriver, 'SCF-TEST-1', 0, false);
 
         const servoController = ServoControllerFactory.create(hardwareInterface);
     
@@ -20,23 +23,53 @@ describe('ServoControllerFactory', () => {
     });
 
     it('should throw an error creating multiple ServoControllers of the same name', () => {
-        const ServoDriver: ServoDriver = { writePwm: jest.fn() };
-        const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST1', 0, false);
+        const ServoDriver: ServoDriver = {
+            writePwm: jest.fn(),
+            dispose: jest.fn()
+        };
+        const hardwareInterface = new HardwareInterface(ServoDriver, 'SCF-TEST-1', 0, false);
 
-        expect(() => ServoControllerFactory.create(hardwareInterface)).toThrowError(/A ServoController already exists named TEST1/);
+        expect(() => ServoControllerFactory.create(hardwareInterface)).toThrowError(/A ServoController already exists named SCF-TEST-1/);
     });
 
-    it('get() should return a ServoController for uniqueHardwareName TEST1', () => {
-        const servoController = ServoControllerFactory.get('TEST1');
+    it('get() should return a ServoController for uniqueHardwareName SCF-TEST-1', () => {
+        const servoController = ServoControllerFactory.get('SCF-TEST-1');
 
         expect(servoController.setAngleDegrees).toBeDefined();
         expect(servoController.setAngleRadians).toBeDefined();
     });
 
-    it('get() should return undefined for uniqueHardwareName TEST2', () => {
-        const servoController = ServoControllerFactory.get('TEST2');
-
+    it('get() should return undefined for uniqueHardwareName SCF-TEST-2', () => {
+        const servoController = ServoControllerFactory.get('SCF-TEST-2');
         expect(servoController).toBeUndefined();
+    });
+
+    describe('dispose', () => {
+        it('should remove controller and allow recreation', () => {
+            const ServoDriver: ServoDriver = {
+                writePwm: jest.fn(),
+                dispose: jest.fn()
+            };
+
+            const hwInterface2 = new HardwareInterface(ServoDriver, 'SCF-TEST-2', 0, false);
+            ServoControllerFactory.create(hwInterface2);
+
+            let controller1 = ServoControllerFactory.get('SCF-TEST-1');
+            let controller2 = ServoControllerFactory.get('SCF-TEST-2');
+
+            expect(controller1.setAngleDegrees).toBeDefined();
+            expect(controller2.setAngleDegrees).toBeDefined();
+            
+            ServoControllerFactory['dispose']('SCF-TEST-1');
+
+            expect(ServoControllerFactory.get('SCF-TEST-1')).toBeUndefined();
+            expect(ServoControllerFactory.get('SCF-TEST-2')).toBeDefined();
+            
+            const newHwInterface1 = new HardwareInterface(ServoDriver, 'SCF-TEST-1', 0, false);
+            const newController1 = ServoControllerFactory.create(newHwInterface1);
+
+            expect(ServoControllerFactory.get('SCF-TEST-1')).toBeDefined();
+        });
     });
 });
 
@@ -47,7 +80,10 @@ describe('ServoController', () => {
         const mockWritePwmFn = jest.fn();
 
         beforeAll(() => {
-            const ServoDriver: ServoDriver = { writePwm: jest.fn() };
+            const ServoDriver: ServoDriver = {
+                writePwm: jest.fn(),
+                dispose: jest.fn()
+            };
             const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST2', 0, false);
     
             servoController = ServoControllerFactory.create(hardwareInterface);
@@ -330,11 +366,13 @@ describe('ServoController', () => {
         });
     });
 
-    describe('disableServo', () => {
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    describe('disable/enable servo', () => {
+        const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
         beforeEach(() => {
-            consoleSpy.mockClear();
+            consoleLogSpy.mockClear();
+            consoleWarnSpy.mockClear();
         });
 
         const servoModel = new ServoModel({
@@ -344,55 +382,123 @@ describe('ServoController', () => {
             servoDirection: ServoDirection.LOWER_PWM_CLOCKWISE
         });
 
-        describe('when hardware does not implement disableServo', () => {
-            it('logs debug message when debug = true', () => {
-                const ServoDriver: ServoDriver = { writePwm: jest.fn() };
-                const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-DISABLE-SERVO-1', 0, false);
-                const servoController = ServoControllerFactory.create(hardwareInterface);
-
-                const servo = new Servo({
-                    servoModel: servoModel,
-                    controller: servoController,
-                    channel: 2,
-                    centerOffsetPwm: 10,
-                    flipDirection: true
+        describe('enableServo', () => {
+            describe('when hardware does not implement disableServo', () => {
+                it('logs debug message when debug = true', () => {
+                    const ServoDriver: ServoDriver = {
+                        writePwm: jest.fn(),
+                        dispose: jest.fn()
+                    };
+                    const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-DISABLE-SERVO-1', 0, false);
+                    const servoController = ServoControllerFactory.create(hardwareInterface);
+    
+                    const servo = new Servo({
+                        servoModel: servoModel,
+                        controller: servoController,
+                        channel: 2,
+                        centerOffsetPwm: 10,
+                        flipDirection: true
+                    });
+    
+                    servoController.disableServo(servo, true);
+    
+                    expect(console.log).toHaveBeenCalledTimes(1);
+                    expect(console.log).toHaveBeenCalledWith('ServoController: disableServo: hardware: TEST-DISABLE-SERVO-1, channel: 2');
+                    expect(console.warn).toHaveBeenCalledTimes(1);
+                    expect(console.warn).toHaveBeenCalledWith('ServoController: Unable to disable servo, hardware TEST-DISABLE-SERVO-1 has no implementation');
                 });
-
-                servoController.disableServo(servo, true);
-
-                expect(console.log).toHaveBeenCalledTimes(2);
-                expect(console.log).toHaveBeenCalledWith('Servo: disableSevo: hardware: TEST-DISABLE-SERVO-1, channel: 2');
-                expect(console.log).toHaveBeenCalledWith('Unable to disable servo, hardware TEST-DISABLE-SERVO-1 has no implementation');
+            });
+    
+            describe('when hardware does implement disableServo', () => {
+                it('calls appropiate ServoDriver method', () => {
+    
+                    const mockServoDriverDisableServoFn = jest.fn();
+    
+                    const ServoDriver: ServoDriver = {
+                        writePwm: jest.fn(),
+                        disableServo: mockServoDriverDisableServoFn,
+                        dispose: jest.fn()
+                    };
+    
+                    const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-DISABLE-SERVO-2', 0, false);
+                    const servoController = ServoControllerFactory.create(hardwareInterface);
+    
+                    const servo = new Servo({
+                        servoModel: servoModel,
+                        controller: servoController,
+                        channel: 2,
+                        centerOffsetPwm: 10,
+                        flipDirection: true
+                    });
+    
+                    servoController.disableServo(servo, true);
+    
+                    expect(mockServoDriverDisableServoFn).toHaveBeenCalledWith(2);
+    
+                    expect(console.log).toHaveBeenCalledTimes(1);
+                    expect(console.log).toHaveBeenCalledWith('ServoController: disableServo: hardware: TEST-DISABLE-SERVO-2, channel: 2');
+                    expect(console.warn).not.toHaveBeenCalled();
+                });
             });
         });
 
-        describe('when hardware does implement disableServo', () => {
-            it('calls appropiate ServoDriver method', () => {
-
-                const mockServoDriverDisableServoFn = jest.fn();
-
-                const ServoDriver: ServoDriver = {
-                    writePwm: jest.fn(),
-                    disableServo: mockServoDriverDisableServoFn
-                };
-
-                const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-DISABLE-SERVO-2', 0, false);
-                const servoController = ServoControllerFactory.create(hardwareInterface);
-
-                const servo = new Servo({
-                    servoModel: servoModel,
-                    controller: servoController,
-                    channel: 2,
-                    centerOffsetPwm: 10,
-                    flipDirection: true
+        describe('disableServo', () => {
+            describe('when hardware does not implement enableServo', () => {
+                it('logs debug message when debug = true', () => {
+                    const ServoDriver: ServoDriver = {
+                        writePwm: jest.fn(),
+                        dispose: jest.fn()
+                    };
+                    const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-ENABLE-SERVO-1', 0, false);
+                    const servoController = ServoControllerFactory.create(hardwareInterface);
+    
+                    const servo = new Servo({
+                        servoModel: servoModel,
+                        controller: servoController,
+                        channel: 2,
+                        centerOffsetPwm: 10,
+                        flipDirection: true
+                    });
+    
+                    servoController.enableServo(servo, true);
+    
+                    expect(console.log).toHaveBeenCalledTimes(1);
+                    expect(console.log).toHaveBeenCalledWith('ServoController: enableServo: hardware: TEST-ENABLE-SERVO-1, channel: 2');
+                    expect(console.warn).toHaveBeenCalledTimes(1);
+                    expect(console.warn).toHaveBeenCalledWith('ServoController: Unable to enable servo, hardware TEST-ENABLE-SERVO-1 has no implementation');
                 });
-
-                servoController.disableServo(servo, true);
-
-                expect(mockServoDriverDisableServoFn).toHaveBeenCalledWith(2);
-
-                expect(console.log).toHaveBeenCalledTimes(1);
-                expect(console.log).toHaveBeenCalledWith('Servo: disableSevo: hardware: TEST-DISABLE-SERVO-2, channel: 2');
+            });
+    
+            describe('when hardware does implement enableServo', () => {
+                it('calls appropiate ServoDriver method', () => {
+    
+                    const mockServoDriverEnableServoFn = jest.fn();
+    
+                    const ServoDriver: ServoDriver = {
+                        writePwm: jest.fn(),
+                        enableServo: mockServoDriverEnableServoFn,
+                        dispose: jest.fn()
+                    };
+    
+                    const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-ENABLE-SERVO-2', 0, false);
+                    const servoController = ServoControllerFactory.create(hardwareInterface);
+    
+                    const servo = new Servo({
+                        servoModel: servoModel,
+                        controller: servoController,
+                        channel: 2,
+                        centerOffsetPwm: 10,
+                        flipDirection: true
+                    });
+    
+                    servoController.enableServo(servo, true);
+    
+                    expect(mockServoDriverEnableServoFn).toHaveBeenCalledWith(2);
+    
+                    expect(console.log).toHaveBeenCalledTimes(1);
+                    expect(console.log).toHaveBeenCalledWith('ServoController: enableServo: hardware: TEST-ENABLE-SERVO-2, channel: 2');
+                    expect(console.warn).not.toHaveBeenCalled();
+                });
             });
         });
     });
@@ -411,7 +517,10 @@ describe('ServoController', () => {
         });
 
         beforeAll(() => {
-            const ServoDriver: ServoDriver = { writePwm: mockWritePwmFn };
+            const ServoDriver: ServoDriver = { 
+                writePwm: mockWritePwmFn,
+                dispose: jest.fn()
+            };
             const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST3', 0, false);
     
             servoController = ServoControllerFactory.create(hardwareInterface);

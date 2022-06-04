@@ -13,11 +13,15 @@ const servoModel = new ServoModel({
 const mockSetAngleDegrees = jest.fn();
 const mockSetAngleRadians = jest.fn();
 const mockDisableServo = jest.fn();
+const mockEnableServo = jest.fn();
+const mockDispose = jest.fn();
 
 const mockServoController: IServoController = {
     setAngleDegrees: mockSetAngleDegrees,
     setAngleRadians: mockSetAngleRadians,
-    disableServo: mockDisableServo
+    disableServo: mockDisableServo,
+    enableServo: mockEnableServo,
+    dispose: mockDispose
 };
 
 describe('constructor', () => {

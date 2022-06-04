@@ -1,6 +1,8 @@
 export interface ServoDriver {
 	writePwm: (channel: number, pwm: number, callback?: Function) => void;
 	disableServo?: (channel: number) => void;
+	enableServo?: (channel: number) => void;
+	dispose: () => void;
 }
 
 export class HardwareInterface {
