@@ -12,10 +12,12 @@ const servoModel = new ServoModel({
 
 const mockSetAngleDegrees = jest.fn();
 const mockSetAngleRadians = jest.fn();
+const mockDisableServo = jest.fn();
 
 const mockServoController: IServoController = {
     setAngleDegrees: mockSetAngleDegrees,
-    setAngleRadians: mockSetAngleRadians
+    setAngleRadians: mockSetAngleRadians,
+    disableServo: mockDisableServo
 };
 
 describe('constructor', () => {
@@ -126,4 +128,8 @@ describe('setAngleRadians', () => {
         expect(mockSetAngleRadians).toHaveBeenCalledWith(servo, -1.23, true);
         expect(mockSetAngleDegrees).not.toHaveBeenCalled();
     });
+});
+
+describe('disableServo', () => {
+
 });

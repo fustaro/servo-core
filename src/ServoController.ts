@@ -29,6 +29,7 @@ export class ServoControllerFactory {
 export interface IServoController {
 	setAngleDegrees: (servo: Servo, angle: number, debug?: boolean) => void;
 	setAngleRadians: (servo: Servo, angle: number, debug?: boolean) => void;
+	disableServo: (servo: Servo, debug?: boolean) => void;
 }
 
 class ServoController implements IServoController {
@@ -123,6 +124,27 @@ class ServoController implements IServoController {
 		this.setAngleDegrees(servo, angle / Math.PI * 180, debug);
 	}
 
+	disableServo = (servo: Servo, debug?: boolean) => {
+		if(debug){
+			console.log(`Servo: disableSevo: hardware: ${this.hardwareInterface.uniqueHardwareName}, channel: ${servo.channel}`);
+		}
+
+		if(!this.hardwareInterface.servoDriver.disableServo){
+			if(debug){
+				console.log(`Unable to disable servo, hardware ${this.hardwareInterface.uniqueHardwareName} has no implementation`);
+			}
+			return;
+		}
+
+		if(this.hardwareInterface.asyncPwmWrite){
+			setTimeout(() => {
+				this.hardwareInterface.servoDriver.disableServo(servo.channel);
+			}, 0);
+		} else {
+			this.hardwareInterface.servoDriver.disableServo(servo.channel);
+		}
+	}
+
 	private writePwm = (servo: Servo, pwm: number) => {
 		pwm = Math.round(pwm);
 
@@ -131,6 +153,6 @@ class ServoController implements IServoController {
 		}
 
 		this.previousPwmValues[servo.channel] = pwm;
-		this.hardwareInterface.pwmWriter.writePwm(servo.channel, pwm);
+		this.hardwareInterface.servoDriver.writePwm(servo.channel, pwm);
 	}
 }

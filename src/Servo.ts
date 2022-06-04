@@ -43,4 +43,8 @@ export class Servo {
 	setAngleRadians = (angle: number, debug?: boolean) => {
         this.controller.setAngleRadians(this, angle, debug)
     };
+
+    disable = (debug?: boolean) => {
+        this.controller.disableServo(this, debug);
+    }
 }
