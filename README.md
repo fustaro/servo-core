@@ -9,3 +9,8 @@ See;
 
 2. @fustaro/pca-9685-controller
     for implementation running a PCA-9685 servo controller (Raspberry Pi)
+
+## Whats new in 4.0.0
+
+- Added optional interface for disabling servos
+- PwmWriter renamed to ServoDriver

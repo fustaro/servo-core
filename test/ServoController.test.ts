@@ -1,4 +1,4 @@
-import { HardwareInterface, PwmWriter } from '../src/HardwareInterface';
+import { HardwareInterface, ServoDriver } from '../src/HardwareInterface';
 import { Servo } from '../src/Servo';
 import { IServoController, ServoControllerFactory } from '../src/ServoController';
 import { ServoDirection } from '../src/ServoDirection';
@@ -10,8 +10,8 @@ describe('ServoControllerFactory', () => {
     });
 
     it('should create and return a new ServoController', () => {
-        const pwmWriter: PwmWriter = { writePwm: jest.fn() };
-        const hardwareInterface = new HardwareInterface(pwmWriter, 'TEST1', 0, false);
+        const ServoDriver: ServoDriver = { writePwm: jest.fn() };
+        const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST1', 0, false);
 
         const servoController = ServoControllerFactory.create(hardwareInterface);
     
@@ -20,8 +20,8 @@ describe('ServoControllerFactory', () => {
     });
 
     it('should throw an error creating multiple ServoControllers of the same name', () => {
-        const pwmWriter: PwmWriter = { writePwm: jest.fn() };
-        const hardwareInterface = new HardwareInterface(pwmWriter, 'TEST1', 0, false);
+        const ServoDriver: ServoDriver = { writePwm: jest.fn() };
+        const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST1', 0, false);
 
         expect(() => ServoControllerFactory.create(hardwareInterface)).toThrowError(/A ServoController already exists named TEST1/);
     });
@@ -47,8 +47,8 @@ describe('ServoController', () => {
         const mockWritePwmFn = jest.fn();
 
         beforeAll(() => {
-            const pwmWriter: PwmWriter = { writePwm: jest.fn() };
-            const hardwareInterface = new HardwareInterface(pwmWriter, 'TEST2', 0, false);
+            const ServoDriver: ServoDriver = { writePwm: jest.fn() };
+            const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST2', 0, false);
     
             servoController = ServoControllerFactory.create(hardwareInterface);
             servoController['writePwm'] = mockWritePwmFn;
@@ -330,6 +330,73 @@ describe('ServoController', () => {
         });
     });
 
+    describe('disableServo', () => {
+        const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+        beforeEach(() => {
+            consoleSpy.mockClear();
+        });
+
+        const servoModel = new ServoModel({
+            pwmRange: { min: 500, natural: 1000, max: 1500 },
+            angleRange: { min: -50, natural: 0, max: 50 },
+            speed: 0.1,
+            servoDirection: ServoDirection.LOWER_PWM_CLOCKWISE
+        });
+
+        describe('when hardware does not implement disableServo', () => {
+            it('logs debug message when debug = true', () => {
+                const ServoDriver: ServoDriver = { writePwm: jest.fn() };
+                const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-DISABLE-SERVO-1', 0, false);
+                const servoController = ServoControllerFactory.create(hardwareInterface);
+
+                const servo = new Servo({
+                    servoModel: servoModel,
+                    controller: servoController,
+                    channel: 2,
+                    centerOffsetPwm: 10,
+                    flipDirection: true
+                });
+
+                servoController.disableServo(servo, true);
+
+                expect(console.log).toHaveBeenCalledTimes(2);
+                expect(console.log).toHaveBeenCalledWith('Servo: disableSevo: hardware: TEST-DISABLE-SERVO-1, channel: 2');
+                expect(console.log).toHaveBeenCalledWith('Unable to disable servo, hardware TEST-DISABLE-SERVO-1 has no implementation');
+            });
+        });
+
+        describe('when hardware does implement disableServo', () => {
+            it('calls appropiate ServoDriver method', () => {
+
+                const mockServoDriverDisableServoFn = jest.fn();
+
+                const ServoDriver: ServoDriver = {
+                    writePwm: jest.fn(),
+                    disableServo: mockServoDriverDisableServoFn
+                };
+
+                const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST-DISABLE-SERVO-2', 0, false);
+                const servoController = ServoControllerFactory.create(hardwareInterface);
+
+                const servo = new Servo({
+                    servoModel: servoModel,
+                    controller: servoController,
+                    channel: 2,
+                    centerOffsetPwm: 10,
+                    flipDirection: true
+                });
+
+                servoController.disableServo(servo, true);
+
+                expect(mockServoDriverDisableServoFn).toHaveBeenCalledWith(2);
+
+                expect(console.log).toHaveBeenCalledTimes(1);
+                expect(console.log).toHaveBeenCalledWith('Servo: disableSevo: hardware: TEST-DISABLE-SERVO-2, channel: 2');
+            });
+        });
+    });
+
     describe('writePwm', () => {
         const mockWritePwmFn = jest.fn();
         let servoController: IServoController;
@@ -344,8 +411,8 @@ describe('ServoController', () => {
         });
 
         beforeAll(() => {
-            const pwmWriter: PwmWriter = { writePwm: mockWritePwmFn };
-            const hardwareInterface = new HardwareInterface(pwmWriter, 'TEST3', 0, false);
+            const ServoDriver: ServoDriver = { writePwm: mockWritePwmFn };
+            const hardwareInterface = new HardwareInterface(ServoDriver, 'TEST3', 0, false);
     
             servoController = ServoControllerFactory.create(hardwareInterface);
 
