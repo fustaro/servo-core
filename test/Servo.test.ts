@@ -1,4 +1,4 @@
-import { IServo, Servo } from "../src/Servo";
+import { ServoConfig, Servo } from "../src/Servo";
 import { IServoController } from "../src/ServoController";
 import { ServoDirection } from "../src/ServoDirection";
 import { ServoModel } from "../src/ServoModel";
@@ -26,7 +26,7 @@ const mockServoController: IServoController = {
 
 describe('constructor', () => {
     it('when servoModel is null, throws exeption', () => {
-        const servoData: IServo = {
+        const servoData: ServoConfig = {
             servoModel: null,
             controller: mockServoController,
             channel: 0,
@@ -39,7 +39,7 @@ describe('constructor', () => {
     });
 
     it('when controller is null, throws exeption', () => {
-        const servoData: IServo = {
+        const servoData: ServoConfig = {
             servoModel: servoModel,
             controller: null,
             channel: 0,

@@ -2,7 +2,7 @@ import { IServoController } from "./ServoController";
 import { ServoModel } from "./ServoModel";
 import { Range } from "./Range";
 
-export interface IServo {
+export interface ServoConfig {
     readonly servoModel: ServoModel;
     readonly controller: IServoController;
     readonly channel: number;
@@ -19,21 +19,23 @@ export class Servo {
     readonly flipDirection: boolean;
     readonly angleClamp?: Range;
 
-    constructor (data: IServo) {
-        if (!data.servoModel) {
+    private disabled: boolean = false;
+
+    constructor (config: ServoConfig) {
+        if (!config.servoModel) {
             throw new Error("Servo: ServoModel must be present (property 'servoModel')");
         }
 
-        if (!data.controller) {
+        if (!config.controller) {
             throw new Error("Servo: ServoController must be present (property 'controller')");
         }
 
-        this.servoModel = data.servoModel;
-        this.controller = data.controller;
-        this.channel = data.channel;
-        this.centerOffsetPwm = data.centerOffsetPwm;
-        this.flipDirection = data.flipDirection;
-        if(data.angleClamp) this.angleClamp = data.angleClamp;
+        this.servoModel = config.servoModel;
+        this.controller = config.controller;
+        this.channel = config.channel;
+        this.centerOffsetPwm = config.centerOffsetPwm;
+        this.flipDirection = config.flipDirection;
+        if(config.angleClamp) this.angleClamp = config.angleClamp;
     }
 
 	setAngleDegrees = (angle: number, debug?: boolean) => {
@@ -50,5 +52,9 @@ export class Servo {
 
     enable = (debug?: boolean) => {
         this.controller.enableServo(this, debug);
+    }
+
+    isDisabled = () => {
+        return this.disabled;
     }
 }

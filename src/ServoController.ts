@@ -48,6 +48,13 @@ class ServoController implements IServoController {
 	}
 
 	setAngleDegrees = (servo: Servo, angle: number, debug: boolean = false) => {
+		if(servo.isDisabled()){
+			if(debug){
+				console.debug("Servo disabled, cannot set angle");
+			}
+			return;
+		}
+
 		const sm = servo.servoModel;
 		let flip = servo.flipDirection;
 
@@ -145,9 +152,11 @@ class ServoController implements IServoController {
 		if(this.hardwareInterface.asyncPwmWrite){
 			setTimeout(() => {
 				this.hardwareInterface.servoDriver.disableServo(servo.channel);
+				servo["disabled"] = true;
 			}, 0);
 		} else {
 			this.hardwareInterface.servoDriver.disableServo(servo.channel);
+			servo["disabled"] = true;
 		}
 	}
 
@@ -166,9 +175,11 @@ class ServoController implements IServoController {
 		if(this.hardwareInterface.asyncPwmWrite){
 			setTimeout(() => {
 				this.hardwareInterface.servoDriver.enableServo(servo.channel);
+				servo["disabled"] = false;
 			}, 0);
 		} else {
 			this.hardwareInterface.servoDriver.enableServo(servo.channel);
+			servo["disabled"] = false;
 		}
 	}
 	
