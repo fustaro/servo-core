@@ -10,6 +10,10 @@ See;
 2. @fustaro/pca-9685-controller
     for implementation running a PCA-9685 servo controller (Raspberry Pi)
 
+## Whats new in 6.0.1
+
+- Fixed bug with tracking if servo is disabled
+
 ## Whats new in 6.0.0
 
 - Added Servo.isDisabled()

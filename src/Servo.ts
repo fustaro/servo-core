@@ -19,8 +19,6 @@ export class Servo {
     readonly flipDirection: boolean;
     readonly angleClamp?: Range;
 
-    private disabled: boolean = false;
-
     constructor (config: ServoConfig) {
         if (!config.servoModel) {
             throw new Error("Servo: ServoModel must be present (property 'servoModel')");
@@ -55,6 +53,6 @@ export class Servo {
     }
 
     isDisabled = () => {
-        return this.disabled;
+        this.controller.isDisabled(this);
     }
 }

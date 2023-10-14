@@ -35,20 +35,23 @@ export interface IServoController {
 	setAngleRadians: (servo: Servo, angle: number, debug?: boolean) => void;
 	disableServo: (servo: Servo, debug?: boolean) => void;
 	enableServo: (servo: Servo, debug?: boolean) => void;
+	isDisabled: (servo: Servo, debug?: boolean) => void;
 	dispose: () => void;
 }
 
 class ServoController implements IServoController {
 	readonly hardwareInterface: HardwareInterface;
 	readonly previousPwmValues: number[];
+	readonly disabledServos: boolean[];
 
 	constructor(servoHardwareDriver: HardwareInterface){
 		this.hardwareInterface = servoHardwareDriver;
 		this.previousPwmValues = new Array<number>(servoHardwareDriver.channelCount);
+		this.disabledServos = new Array<boolean>(servoHardwareDriver.channelCount);
 	}
 
 	setAngleDegrees = (servo: Servo, angle: number, debug: boolean = false) => {
-		if(servo.isDisabled()){
+		if(this.isDisabled(servo)){
 			if(debug){
 				console.debug("Servo disabled, cannot set angle");
 			}
@@ -175,12 +178,20 @@ class ServoController implements IServoController {
 		if(this.hardwareInterface.asyncPwmWrite){
 			setTimeout(() => {
 				this.hardwareInterface.servoDriver.enableServo(servo.channel);
-				servo["disabled"] = false;
+				this.disabledServos[servo.channel] = true;
 			}, 0);
 		} else {
 			this.hardwareInterface.servoDriver.enableServo(servo.channel);
-			servo["disabled"] = false;
+			this.disabledServos[servo.channel] = true;
 		}
+	}
+
+	isDisabled = (servo: Servo, debug?: boolean) => {
+		const disabled = !!this.disabledServos[servo.channel];
+		if(debug){
+			console.log(`ServoController: isDisabled: hardware: ${this.hardwareInterface.uniqueHardwareName}, channel: ${servo.channel}, disabled: ${disabled}`);
+		}
+		return disabled;
 	}
 	
 	dispose = (debug?: boolean) => {
