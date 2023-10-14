@@ -35,7 +35,7 @@ export interface IServoController {
 	setAngleRadians: (servo: Servo, angle: number, debug?: boolean) => void;
 	disableServo: (servo: Servo, debug?: boolean) => void;
 	enableServo: (servo: Servo, debug?: boolean) => void;
-	isDisabled: (servo: Servo, debug?: boolean) => void;
+	isDisabled: (servo: Servo, debug?: boolean) => boolean;
 	dispose: () => void;
 }
 
