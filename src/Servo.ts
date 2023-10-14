@@ -53,6 +53,6 @@ export class Servo {
     }
 
     isDisabled = () => {
-        this.controller.isDisabled(this);
+        return this.controller.isDisabled(this);
     }
 }
