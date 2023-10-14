@@ -152,14 +152,14 @@ class ServoController implements IServoController {
 			return;
 		}
 
+		this.disabledServos[servo.channel] = true;
+
 		if(this.hardwareInterface.asyncPwmWrite){
 			setTimeout(() => {
 				this.hardwareInterface.servoDriver.disableServo(servo.channel);
-				this.disabledServos[servo.channel] = true;
 			}, 0);
 		} else {
 			this.hardwareInterface.servoDriver.disableServo(servo.channel);
-			this.disabledServos[servo.channel] = true;
 		}
 	}
 
@@ -175,14 +175,14 @@ class ServoController implements IServoController {
 			return;
 		}
 
+		this.disabledServos[servo.channel] = false;
+
 		if(this.hardwareInterface.asyncPwmWrite){
 			setTimeout(() => {
 				this.hardwareInterface.servoDriver.enableServo(servo.channel);
-				this.disabledServos[servo.channel] = false;
 			}, 0);
 		} else {
 			this.hardwareInterface.servoDriver.enableServo(servo.channel);
-			this.disabledServos[servo.channel] = false;
 		}
 	}
 
